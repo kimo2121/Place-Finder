@@ -15,7 +15,7 @@ export async function getStaticProps(staticProps) {
   return {
     props: {
       coffeeStore: coffeeStoresData.find((coffeeStore) => {
-        return coffeeStore.place_id === params.id; //dynamic id
+        return coffeeStore.id === params.id; //dynamic id
       }),
     },
   };
@@ -26,7 +26,7 @@ export async function getStaticPaths() {
   const paths = coffeeStoresData.map((coffeeStore) => {
     return {
       params: {
-        id: coffeeStore.place_id,
+        id: coffeeStore.id,
       },
     };
   });
@@ -44,7 +44,8 @@ const CoffeeStore = (props) => {
   //   return <div>Loading...</div>;
   // }
 
-  const { name, imgUrl, vicinity, plus_code, rating } = props.coffeeStore;
+  const { name, imgUrl, location, id, rating, neighborhood } =
+    props.coffeeStore;
   console.log("props", props);
   return (
     <div className={styles.layout}>
@@ -74,14 +75,14 @@ const CoffeeStore = (props) => {
             <Image src="/static/icons/places.svg" width="24" height="24" />
             <p className={styles.text}>
               {/* {geometry?.location} */}
-              {vicinity}
+              {neighborhood}
             </p>
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/nearMe.svg" width="24" height="24" />
             <p className={styles.text}>
-              {/* {location.neighborhood[0] } */}
-              {plus_code.compound_code.slice(8)}
+              {/* {plus_code.compound_code.slice(8)} */}
+              {location}
             </p>
           </div>
           <div className={styles.iconWrapper}>

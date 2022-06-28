@@ -4,8 +4,9 @@ import Banner from "../components/banner";
 import styles from "../styles/Home.module.css";
 import Card from "../components/card";
 import axios from "axios";
-
+import useTrackLocation from "../hooks/track-location";
 import { fetchCoffeeStores } from "../lib/coffee-store";
+import { useEffect, useState } from "react";
 
 export async function getStaticProps(context) {
   const coffeeStoresData = await fetchCoffeeStores();
@@ -66,9 +67,33 @@ export async function getStaticProps(context) {
 // }
 
 export default function Home(props) {
+  const [nearbyStores, setNearbyStores] = useState([]);
+  const [coffeeStoreError, setCoffeeStoreError] = useState(null);
   console.log(props);
+  const { latLong, handleTrackLocation, locationErrorMsg, isFindingLocation } =
+    useTrackLocation();
 
-  const handleOnBannerBtnClick = () => {};
+  console.log({ latLong, locationErrorMsg });
+
+  useEffect(() => {
+    async function setCoffeeStoresByLocation() {
+      if (latLong) {
+        try {
+          const fetchedCoffeeStores = await fetchCoffeeStores(latLong);
+          setNearbyStores(fetchedCoffeeStores);
+          console.log({ fetchedCoffeeStores });
+        } catch (error) {
+          console.log("Error", { error });
+          setCoffeeStoreError(error.message);
+        }
+      }
+    }
+    setCoffeeStoresByLocation();
+  }, [latLong]);
+
+  const handleOnBannerBtnClick = () => {
+    handleTrackLocation();
+  };
 
   return (
     <div className={styles.container}>
@@ -80,11 +105,33 @@ export default function Home(props) {
       <main className={styles.main}>
         <Banner
           handleOnClick={handleOnBannerBtnClick}
-          buttonText="View stores nearby"
+          buttonText={isFindingLocation ? "Loading..." : "View stores nearby"}
         />
+        {locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
+        {coffeeStoreError && <p>Something went wrong: {coffeeStoreError}</p>}
         <div className={styles.heroImage}>
           <Image src="/static/hero.png" width={700} height={400} />
         </div>
+        {nearbyStores.length > 0 && (
+          <h2 className={styles.heading2}>Nearby Stores</h2>
+        )}
+        {nearbyStores.length > 0 && (
+          <>
+            <div className={styles.cardLayout}>
+              {nearbyStores.map((coffeeStore) => {
+                return (
+                  <Card
+                    key={coffeeStore.id}
+                    name={coffeeStore.name}
+                    imgUrl={coffeeStore?.imgUrl || "/static/hero.png"}
+                    href={`/coffee/${coffeeStore?.id}`}
+                    className={styles.card}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
         <h2 className={styles.heading2}>Toronto stores</h2>
         {props.coffeeStores.length > 0 && (
           <>
@@ -92,10 +139,10 @@ export default function Home(props) {
               {props.coffeeStores.map((coffeeStore) => {
                 return (
                   <Card
-                    key={coffeeStore.place_id}
+                    key={coffeeStore.id}
                     name={coffeeStore.name}
                     imgUrl={coffeeStore?.imgUrl || "/static/hero.png"}
-                    href={`/coffee/${coffeeStore?.place_id}`}
+                    href={`/coffee/${coffeeStore?.id}`}
                     className={styles.card}
                   />
                 );
