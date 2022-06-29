@@ -87,7 +87,7 @@ const CoffeeStore = (props) => {
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/star.svg" width="24" height="24" />
-            <p className={styles.text}>{rating}</p>
+            <p className={styles.text}>2</p>
           </div>
 
           <button className={styles.upvoteButton} onClick={handleUpvoteButton}>

@@ -69,19 +69,24 @@ export async function getStaticProps(context) {
 export default function Home(props) {
   const [nearbyStores, setNearbyStores] = useState([]);
   const [coffeeStoreError, setCoffeeStoreError] = useState(null);
-  console.log(props);
+
+  // console.log(props);
+
   const { latLong, handleTrackLocation, locationErrorMsg, isFindingLocation } =
     useTrackLocation();
 
-  console.log({ latLong, locationErrorMsg });
+  // console.log({ latLong, locationErrorMsg });
 
   useEffect(() => {
     async function setCoffeeStoresByLocation() {
+      // console.log(latLong, "again mother fucker");
       if (latLong) {
         try {
           const fetchedCoffeeStores = await fetchCoffeeStores(latLong);
           setNearbyStores(fetchedCoffeeStores);
-          console.log({ fetchedCoffeeStores });
+          console.log(latLong, "again mother fucker");
+          console.log("Nearby", { fetchedCoffeeStores });
+          // console.log("nearbyStores", { nearbyStores });
         } catch (error) {
           console.log("Error", { error });
           setCoffeeStoreError(error.message);
@@ -113,7 +118,7 @@ export default function Home(props) {
           <Image src="/static/hero.png" width={700} height={400} />
         </div>
         {nearbyStores.length > 0 && (
-          <h2 className={styles.heading2}>Nearby Stores</h2>
+          <h2 className={styles.heading2}>Nearby Restaurants</h2>
         )}
         {nearbyStores.length > 0 && (
           <>
@@ -132,7 +137,7 @@ export default function Home(props) {
             </div>
           </>
         )}
-        <h2 className={styles.heading2}>Toronto stores</h2>
+        <h2 className={styles.heading2}>Downtown Restaurants</h2>
         {props.coffeeStores.length > 0 && (
           <>
             <div className={styles.cardLayout}>
