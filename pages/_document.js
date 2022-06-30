@@ -5,10 +5,6 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          {/* <script
-            async
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrkGbo8W8P7XwpJ45ZwRU--uFrckGtxqQ&libraries=geometry&callback=initMap"
-          ></script> */}
           <link
             rel="preconnect"
             href="https://fonts.googleapis.com"

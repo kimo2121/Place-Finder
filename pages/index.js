@@ -3,90 +3,42 @@ import Image from "next/image";
 import Banner from "../components/banner";
 import styles from "../styles/Home.module.css";
 import Card from "../components/card";
-import axios from "axios";
 import useTrackLocation from "../hooks/track-location";
 import { fetchCoffeeStores } from "../lib/coffee-store";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { ACTION_TYPES, StoreContext } from "../store/store-context";
 
 export async function getStaticProps(context) {
   const coffeeStoresData = await fetchCoffeeStores();
 
-  // const config = {
-  //   method: "get",
-  //   url: "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=cafe&keyword=cruise&key=AIzaSyDrkGbo8W8P7XwpJ45ZwRU--uFrckGtxqQ",
-  //   headers: {},
-  // };
-  // const response = await axios(config)
-  //   .then(function (response) {
-  //     console.log(response.data);
-  //     return response.data;
-  //   })
-  //   .catch(function (error) {
-  //     console.log(error);
-  //   });
-
-  // const config = {
-  //   method: "get",
-  //   headers: {},
-  // };
-
-  // const response = await fetch(
-  //   "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&keyword=cruise&key=AIzaSyDrkGbo8W8P7XwpJ45ZwRU--uFrckGtxqQ",
-  //   config
-  // );
-  // const data = await response.json();
   return {
     props: {
       coffeeStores: coffeeStoresData.slice(0, 6),
     },
   };
 }
-// export async function getStaticProps(context) {
-//   // const coffeeStores = await fetchCoffeeStores();
-//   const options = {
-//     method: "GET",
-//     headers: {
-//       Accept: "application/json",
-//       // "User-Agent": "*",
-//       Authorization: "fsq3FXaSn50EuIRHwsY56goX3XOQK7AQkJXo/MElJz0WJyY=",
-//     },
-//   };
-
-//   const response = await fetch(
-//     `https://api.foursquare.com/v3/places/search?query=coffee&ll=43.653833032607096%2C-79.37896808855945&limit=6`,
-//     options
-//   );
-
-//   const data = await response.json();
-//   console.log("data", data);
-//   return {
-//     props: {
-//       coffeeStores: data.results,
-//     },
-//   };
-// }
 
 export default function Home(props) {
-  const [nearbyStores, setNearbyStores] = useState([]);
+  const { state, dispatch } = useContext(StoreContext);
+
   const [coffeeStoreError, setCoffeeStoreError] = useState(null);
+  const latLong = state.latLong;
+  const nearbyStores = state.coffeeStores;
 
-  // console.log(props);
-
-  const { latLong, handleTrackLocation, locationErrorMsg, isFindingLocation } =
+  const { handleTrackLocation, locationErrorMsg, isFindingLocation } =
     useTrackLocation();
-
-  // console.log({ latLong, locationErrorMsg });
 
   useEffect(() => {
     async function setCoffeeStoresByLocation() {
-      // console.log(latLong, "again mother fucker");
       if (latLong) {
         try {
           const fetchedCoffeeStores = await fetchCoffeeStores(latLong);
-          setNearbyStores(fetchedCoffeeStores);
           console.log(latLong, "again mother fucker");
           console.log("Nearby", { fetchedCoffeeStores });
-          // console.log("nearbyStores", { nearbyStores });
+          dispatch({
+            type: ACTION_TYPES.SET_COFFEE_STORES,
+            payload: { coffeeStores: fetchedCoffeeStores },
+          });
         } catch (error) {
           console.log("Error", { error });
           setCoffeeStoreError(error.message);
@@ -126,9 +78,13 @@ export default function Home(props) {
               {nearbyStores.map((coffeeStore) => {
                 return (
                   <Card
+                    latLong={latLong}
                     key={coffeeStore.id}
                     name={coffeeStore.name}
-                    imgUrl={coffeeStore?.imgUrl || "/static/hero.png"}
+                    imgUrl={
+                      coffeeStore?.imgUrl ||
+                      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzMjc2MTN8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50fGVufDB8fHx8MTY1NjUxOTc3Nw&ixlib=rb-1.2.1&q=80&w=400"
+                    }
                     href={`/coffee/${coffeeStore?.id}`}
                     className={styles.card}
                   />

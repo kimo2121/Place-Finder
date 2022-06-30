@@ -1,22 +1,27 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Head from "next/head";
-// import coffeeStoresData from "../../data/coffee-stores.json";
 import Image from "next/image";
 import styles from "../../styles/coffee-store.module.css";
 import cls from "classnames";
 import { fetchCoffeeStores } from "../../lib/coffee-store";
+import { useContext, useState, useEffect } from "react";
+import { StoreContext } from "../../store/store-context";
+
+import { isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps) {
   const params = staticProps.params;
   const coffeeStoresData = await fetchCoffeeStores();
 
+  const findCoffeeStore = coffeeStoresData.find((coffeeStore) => {
+    return coffeeStore.id === params.id; //dynamic id
+  });
+
   console.log("params", params);
   return {
     props: {
-      coffeeStore: coffeeStoresData.find((coffeeStore) => {
-        return coffeeStore.id === params.id; //dynamic id
-      }),
+      coffeeStore: findCoffeeStore ? findCoffeeStore : {},
     },
   };
 }
@@ -36,17 +41,37 @@ export async function getStaticPaths() {
   };
 }
 
-const CoffeeStore = (props) => {
+const CoffeeStore = (initialProps) => {
   const router = useRouter();
   console.log("router", router);
-  const handleUpvoteButton = () => {};
-  // if (router.isFallback) {
-  //   return <div>Loading...</div>;
-  // }
 
-  const { name, imgUrl, location, id, rating, neighborhood } =
-    props.coffeeStore;
-  console.log("props", props);
+  const handleUpvoteButton = () => {};
+  if (router.isFallback) {
+    return <div>Loading...</div>;
+  }
+
+  const id = router.query.id;
+
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+  const {
+    state: { coffeeStores },
+  } = useContext(StoreContext);
+
+  useEffect(() => {
+    if (isEmpty(initialProps.coffeeStore)) {
+      if (coffeeStores.length > 0) {
+        const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+          return coffeeStore.id === id; //dynamic id
+        });
+        setCoffeeStore(findCoffeeStoreById);
+      }
+    }
+  }, [id]);
+
+  const { name, location, neighborhood, imgUrl } = coffeeStore;
+
+  console.log("props", initialProps);
   return (
     <div className={styles.layout}>
       <Head>
@@ -63,7 +88,10 @@ const CoffeeStore = (props) => {
             <h1 className={styles.name}>{name}</h1>
           </div>
           <Image
-            src={imgUrl || "/static/hero.png"}
+            src={
+              imgUrl ||
+              "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzMjc2MTN8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50fGVufDB8fHx8MTY1NjUxOTc3Nw&ixlib=rb-1.2.1&q=80&w=400"
+            }
             width={1000}
             height={500}
             className={styles.storeImg}
