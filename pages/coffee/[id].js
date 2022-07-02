@@ -18,7 +18,7 @@ export async function getStaticProps(staticProps) {
     return coffeeStore.id === params.id; //dynamic id
   });
 
-  console.log("params", params);
+  // console.log("params", params);
   return {
     props: {
       coffeeStore: findCoffeeStore ? findCoffeeStore : {},
@@ -43,7 +43,7 @@ export async function getStaticPaths() {
 
 const CoffeeStore = (initialProps) => {
   const router = useRouter();
-  console.log("router", router);
+  // console.log("router", router);
 
   const handleUpvoteButton = () => {};
   if (router.isFallback) {
@@ -58,20 +58,48 @@ const CoffeeStore = (initialProps) => {
     state: { coffeeStores },
   } = useContext(StoreContext);
 
+  const handleCreateCoffeeStore = async (coffeeStore) => {
+    try {
+      const { id, name, voting, imgUrl, neighborhood, address } = coffeeStore;
+      const response = await fetch("/api/createCoffeeStore", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          name,
+          voting: 0,
+          imgUrl,
+          neighborhood: neighborhood || "",
+          address: address || "",
+        }),
+      });
+
+      const dbCoffeeStore = await response.json();
+      console.log({ dbCoffeeStore });
+    } catch (err) {
+      console.error("Error creating coffee store", err);
+    }
+  };
+
   useEffect(() => {
     if (isEmpty(initialProps.coffeeStore)) {
       if (coffeeStores.length > 0) {
         const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
-          return coffeeStore.id === id; //dynamic id
+          return coffeeStore.id.toString() === id; //dynamic id
         });
         setCoffeeStore(findCoffeeStoreById);
+        handleCreateCoffeeStore(findCoffeeStoreById);
       }
+    } else {
+      // SSG
+      handleCreateCoffeeStore(initialProps.coffeeStore);
     }
-  }, [id]);
+  }, [id, initialProps.coffeeStore]);
 
-  const { name, location, neighborhood, imgUrl } = coffeeStore;
+  const { name, address, neighborhood, imgUrl } = coffeeStore;
 
-  console.log("props", initialProps);
   return (
     <div className={styles.layout}>
       <Head>
@@ -110,7 +138,7 @@ const CoffeeStore = (initialProps) => {
             <Image src="/static/icons/nearMe.svg" width="24" height="24" />
             <p className={styles.text}>
               {/* {plus_code.compound_code.slice(8)} */}
-              {location}
+              {address}
             </p>
           </div>
           <div className={styles.iconWrapper}>
