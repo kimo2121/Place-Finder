@@ -47,7 +47,7 @@ const CoffeeStore = (initialProps) => {
 
   const handleUpvoteButton = () => {};
   if (router.isFallback) {
-    return <div>Loading...</div>;
+    return <h1>Loading...</h1>;
   }
 
   const id = router.query.id;
@@ -129,17 +129,11 @@ const CoffeeStore = (initialProps) => {
         <div className={cls("glass", styles.col2)}>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/places.svg" width="24" height="24" />
-            <p className={styles.text}>
-              {/* {geometry?.location} */}
-              {neighborhood}
-            </p>
+            <p className={styles.text}>{neighborhood}</p>
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/nearMe.svg" width="24" height="24" />
-            <p className={styles.text}>
-              {/* {plus_code.compound_code.slice(8)} */}
-              {address}
-            </p>
+            <p className={styles.text}>{address}</p>
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/star.svg" width="24" height="24" />
