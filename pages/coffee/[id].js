@@ -1,3 +1,4 @@
+import { useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Head from "next/head";
@@ -5,7 +6,6 @@ import Image from "next/image";
 import styles from "../../styles/coffee-store.module.css";
 import cls from "classnames";
 import { fetchCoffeeStores } from "../../lib/coffee-store";
-import { useContext, useState, useEffect } from "react";
 import { StoreContext } from "../../store/store-context";
 import useSWR from "swr";
 import { fetcher, isEmpty } from "../../utils";
@@ -42,6 +42,9 @@ export async function getStaticPaths() {
 }
 
 const CoffeeStore = (initialProps) => {
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+  const [votingCount, setVotingCount] = useState(0);
+
   const router = useRouter();
 
   if (router.isFallback) {
@@ -49,9 +52,6 @@ const CoffeeStore = (initialProps) => {
   }
 
   const id = router.query.id;
-
-  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
-  const [votingCount, setVotingCount] = useState(0);
 
   const {
     state: { coffeeStores },
