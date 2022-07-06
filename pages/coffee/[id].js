@@ -15,10 +15,9 @@ export async function getStaticProps(staticProps) {
   const coffeeStoresData = await fetchCoffeeStores();
 
   const findCoffeeStore = coffeeStoresData.find((coffeeStore) => {
-    return coffeeStore.id === params.id; //dynamic id
+    return coffeeStore.id === params.id;
   });
 
-  // console.log("params", params);
   return {
     props: {
       coffeeStore: findCoffeeStore ? findCoffeeStore : {},
@@ -44,18 +43,37 @@ export async function getStaticPaths() {
 const CoffeeStore = (initialProps) => {
   const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
   const [votingCount, setVotingCount] = useState(0);
-
+  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
   const router = useRouter();
+  const {
+    state: { coffeeStores },
+  } = useContext(StoreContext);
 
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setCoffeeStore(data[0]);
+      setVotingCount(data[0].voting);
+    }
+  }, [data]);
+  useEffect(() => {
+    if (isEmpty(initialProps.coffeeStore)) {
+      if (coffeeStores.length > 0) {
+        const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+          return coffeeStore.id.toString() === id;
+        });
+        setCoffeeStore(findCoffeeStoreById);
+        handleCreateCoffeeStore(findCoffeeStoreById);
+      }
+    } else {
+      // SSG
+      handleCreateCoffeeStore(initialProps.coffeeStore);
+    }
+  }, [id, initialProps.coffeeStore]);
   if (router.isFallback) {
     return <h1>Loading...</h1>;
   }
 
   const id = router.query.id;
-
-  const {
-    state: { coffeeStores },
-  } = useContext(StoreContext);
 
   const handleCreateCoffeeStore = async (coffeeStore) => {
     try {
@@ -83,31 +101,7 @@ const CoffeeStore = (initialProps) => {
     }
   };
 
-  useEffect(() => {
-    if (isEmpty(initialProps.coffeeStore)) {
-      if (coffeeStores.length > 0) {
-        const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
-          return coffeeStore.id.toString() === id;
-        });
-        setCoffeeStore(findCoffeeStoreById);
-        handleCreateCoffeeStore(findCoffeeStoreById);
-      }
-    } else {
-      // SSG
-      handleCreateCoffeeStore(initialProps.coffeeStore);
-    }
-  }, [id, initialProps.coffeeStore]);
-
   const { name, address, neighborhood, imgUrl } = coffeeStore;
-
-  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setCoffeeStore(data[0]);
-      setVotingCount(data[0].voting);
-    }
-  }, [data]);
 
   const handleUpvoteButton = async () => {
     try {

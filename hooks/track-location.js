@@ -3,9 +3,9 @@ import { ACTION_TYPES, StoreContext } from "../store/store-context";
 
 const useTrackLocation = () => {
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
-  // const [latLong, setLatLong] = useState("");
   const [isFindingLocation, setIsFindingLocation] = useState(false);
   const { dispatch } = useContext(StoreContext);
+  // const [latLong, setLatLong] = useState("");
 
   const success = (position) => {
     const latitude = position.coords.latitude;
