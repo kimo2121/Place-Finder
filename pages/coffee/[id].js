@@ -41,10 +41,12 @@ export async function getStaticPaths() {
 }
 
 const CoffeeStore = (initialProps) => {
+  const router = useRouter();
+  const id = router.query.id;
+
   const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
   const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
   const [votingCount, setVotingCount] = useState(0);
-  const router = useRouter();
   const {
     state: { coffeeStores },
   } = useContext(StoreContext);
@@ -72,8 +74,6 @@ const CoffeeStore = (initialProps) => {
   if (router.isFallback) {
     return <h1>Loading...</h1>;
   }
-
-  const id = router.query.id;
 
   const handleCreateCoffeeStore = async (coffeeStore) => {
     try {
