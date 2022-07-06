@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import useSWR from "swr";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
@@ -7,7 +8,6 @@ import styles from "../../styles/coffee-store.module.css";
 import cls from "classnames";
 import { fetchCoffeeStores } from "../../lib/coffee-store";
 import { StoreContext } from "../../store/store-context";
-import useSWR from "swr";
 import { fetcher, isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps) {
